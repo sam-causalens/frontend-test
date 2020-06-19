@@ -72,7 +72,7 @@ app.post("/predict", (req, res) => {
     const featureImportance = {};
     let remaining = 1;
     for (let key of validKeys) {
-        if (key === req.body.target) {
+        if (key === req.body.target || key === "index") {
             continue;
         }
         const importance = Math.random();
