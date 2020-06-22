@@ -1,10 +1,12 @@
 const bodyParser = require("body-parser");
+const cors = require("cors");
 const express = require("express");
 const difference = require("lodash/difference");
 
 const app = express();
+app.use(cors());
 app.use(bodyParser.json());
-const port = 3000;
+const port = 3001;
 
 /**
  * Main endpoint for predicting the some results from the data and target provided. The data should be in json form and
