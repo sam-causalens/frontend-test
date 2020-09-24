@@ -3,7 +3,6 @@ const cors = require("cors");
 const csv = require("csv-parser");
 const express = require("express");
 const fs = require("fs");
-const difference = require("lodash/difference");
 
 const data = [];
 fs.createReadStream("demo_data.csv")
@@ -26,6 +25,13 @@ const port = 3001;
 app.get("/list-targets", (req, res) => {
     const targets = Object.keys(data[0]).filter((col) => col !== "index");
     res.send(targets);
+});
+
+/**
+ * List the raw data from the backend
+ */
+app.get("/data", (req, res) => {
+    res.send(data.slice(2, data.length));
 });
 
 /**
