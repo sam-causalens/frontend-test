@@ -22,7 +22,7 @@ const port = 3001;
 /**
  * List the targets available from the dataset that is currently loaded
  */
-app.get("/list-targets", (req, res) => {
+app.get("/series", (req, res) => {
     const targets = Object.keys(data[0]).filter((col) => col !== "index");
     res.send(targets);
 });
@@ -30,16 +30,17 @@ app.get("/list-targets", (req, res) => {
 /**
  * List the raw data from the backend
  */
-app.get("/data", (req, res) => {
-    res.send(data.slice(2, data.length));
+app.get("/data/:series", (req, res) => {
+    const series = req.params.series;
+    res.send(data.slice(2, data.length).map(row => ({index: row.index, [series]: row[series]})));
 });
 
 /**
  * Main endpoint for predicting the results from the target provided. The target should be provided as a string as
  * returned by the list-targets endpoint
  */
-app.get("/predict", (req, res) => {
-    const target = req.query.target;
+app.get("/predict/:target", (req, res) => {
+    const target = req.params.target;
 
     // Run some validation on the input
     if (!target) {
@@ -52,8 +53,11 @@ app.get("/predict", (req, res) => {
 
     // Build out the fake responses for predictions and featureImportances
     const predictions = [];
-    for (let item of data) {
-        predictions.push(item[target] * (Math.random() + 0.5));
+    for (let item of data.slice(2, data.length)) {
+        predictions.push({
+            index: item.index,
+            prediction: item[target] * (Math.random() + 0.5)
+        });
     }
 
     const featureImportance = {};
@@ -62,7 +66,7 @@ app.get("/predict", (req, res) => {
         if (key === target || key === "index") {
             continue;
         }
-        const importance = Math.random();
+        const importance = Math.random() / 3;
         if (importance < remaining) {
             featureImportance[key] = importance;
             remaining = remaining - importance;
@@ -82,24 +86,8 @@ app.get("/predict", (req, res) => {
     confusionMetric.trueNegative = confusionRemaining;
 
     const response = {
+        confusionMetric,
         featureImportance,
-        predictions,
-        metrics: {
-            confusionMetric,
-            detailedScoring: {
-                pearsonR: Math.random(),
-                spearmanRho: Math.random(),
-                meanAbsError: Math.random() * 2,
-                medianAbsError: Math.random() * 2,
-                percentageAbsError: Math.random() * 100,
-                signMatch: Math.random(),
-            },
-            overallScores: {
-                training: 57,
-                validation: 55,
-                testing: 43,
-            },
-        },
         modelSummary: {
             algo_type: "linear.OLS",
             n_retrain: 0,
@@ -109,6 +97,15 @@ app.get("/predict", (req, res) => {
             scaling: "no_scaling",
             training_mode: "offline",
             weight_decay: 0.0,
+        },
+        predictions,
+        scoring_metrics: {
+            pearsonR: Math.random(),
+            spearmanRho: Math.random(),
+            meanAbsError: Math.random() * 2,
+            medianAbsError: Math.random() * 2,
+            percentageAbsError: Math.random() * 100,
+            signMatch: Math.random(),
         },
     };
     res.send(response);
