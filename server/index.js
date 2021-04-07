@@ -39,7 +39,7 @@ app.get("/data/:series", (req, res) => {
  * Main endpoint for predicting the results from the target provided. The target should be provided as a string as
  * returned by the list-targets endpoint
  */
-app.get("/predict/:target", (req, res) => {
+app.get("/results/:target", (req, res) => {
     const target = req.params.target;
 
     // Run some validation on the input
