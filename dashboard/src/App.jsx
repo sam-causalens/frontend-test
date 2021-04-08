@@ -2,12 +2,16 @@ import React, { useEffect, useState } from "react";
 import DropdownMenu from "./DropdownMenu";
 import LineGraph from "./LineGraph";
 import axios from "axios";
+import ConfusionMetricTable from "./ConfusionMetricTable";
+import ModelDetails from "./ModelDetails";
 
 const App = () => {
   const [desiredSeries, setDesiredSeries] = useState(null);
   const [apiResults, setApiResults] = useState([]);
   const [apiData, setApiData] = useState([]);
   const [lineGraphData, setLineGraphData] = useState([]);
+  const [confusionMetricData, setConfusionMetricData] = useState({})
+  const [modelData, setModelData] = useState({})
 
   const updatedDesiredSeries = (series) => {
     console.log(series)
@@ -33,6 +37,8 @@ const App = () => {
           `http://localhost:3001/results/${desiredSeries}`
         );
         setApiResults(response.data);
+        setConfusionMetricData(response.data.confusionMetric)
+        setModelData(response.data.modelSummary)
       } catch (err) {
         console.error(err);
       }
@@ -64,8 +70,11 @@ const App = () => {
 
   return (
     <div>
+      <h1>CausaLens Data Dashboard</h1>
       <DropdownMenu updatedDesiredSeries={updatedDesiredSeries} />
       <LineGraph data={lineGraphData} />
+      <ConfusionMetricTable data={confusionMetricData} />
+      <ModelDetails data={modelData} />
     </div>
   );
 };
