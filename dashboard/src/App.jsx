@@ -12,14 +12,15 @@ const App = () => {
   const [lineGraphData, setLineGraphData] = useState([]);
   const [confusionMetricData, setConfusionMetricData] = useState({})
   const [modelData, setModelData] = useState({})
+  const [featureImportanceData, setFeatureImportanceData] = useState({})
 
   const updatedDesiredSeries = (series) => {
-    console.log(series)
     setDesiredSeries(series);
   };
 
   //CALL RESULTS & DATA ENDPOINT AND SAVE TO STATE WHEN VIEW DATA SERIES BUTTON IS CLICKED
   useEffect(() => {
+    setConfusionMetricData({})
     const fetchApiData = async () => {
       try {
         const response = await axios.get(
@@ -39,6 +40,16 @@ const App = () => {
         setApiResults(response.data);
         setConfusionMetricData(response.data.confusionMetric)
         setModelData(response.data.modelSummary)
+
+        const featureImportanceData = []
+        const arrayOfFeatureNames = Object.keys(response.data.featureImportance)
+        arrayOfFeatureNames.forEach((featureName) => {
+          featureImportanceData.push({
+            "Feature": featureName,
+            "Importance": response.data.featureImportance.featureName
+          })
+        })
+        setFeatureImportanceData(featureImportanceData)
       } catch (err) {
         console.error(err);
       }
@@ -47,6 +58,8 @@ const App = () => {
     fetchApiData();
     fetchApiResults();
   }, [desiredSeries]);
+
+  // console.log(featureImportanceData)
 
   //PASSES ApiData & Api Results Predictions vs Actual DATA SERIES INTO THE LINE GRAPH COMPONENT
   useEffect(() => {
@@ -64,9 +77,7 @@ const App = () => {
     }
   }, [apiResults, apiData, desiredSeries]);
 
-  console.log(desiredSeries)
-
-  console.log(lineGraphData);
+  console.log(desiredSeries, confusionMetricData)
 
   return (
     <div>
